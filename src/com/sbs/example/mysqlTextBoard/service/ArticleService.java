@@ -24,4 +24,8 @@ public class ArticleService {
 		return articleDao.delete(id);
 	}
 
+	public int write(int boardId, int memberId, String title, String body) {
+		return articleDao.add(boardId, memberId, title, body);
+	}
+
 }

@@ -1,7 +1,9 @@
 package com.sbs.example.mysqlTextBoard.controller;
 
 import java.util.List;
+import java.util.Scanner;
 
+import com.sbs.example.mysqlTextBoard.Container;
 import com.sbs.example.mysqlTextBoard.dto.Article;
 import com.sbs.example.mysqlTextBoard.service.ArticleService;
 
@@ -19,7 +21,28 @@ public class ArticleController {
 			showDetail(cmd);
 		} else if (cmd.startsWith("article delete ")) {
 			doDelete(cmd);
+		} else if (cmd.startsWith("article write")) {
+			doWrite(cmd);
 		}
+	}
+
+	private void doWrite(String cmd) {
+		System.out.println("== 게시물 작성 ==");
+
+		Scanner sc = Container.scanner;
+
+		System.out.printf("제목 : ");
+		String title = sc.nextLine();
+
+		System.out.printf("내용 : ");
+		String body = sc.nextLine();
+
+		int memberId = 1; // 임시 1
+		int boardId = 1; // 임시 1
+
+		int id = articleService.write(boardId, memberId, title, body);
+
+		System.out.printf("%d번 게시물을 생성하였습니다.\n", id);
 	}
 
 	private void doDelete(String cmd) {
