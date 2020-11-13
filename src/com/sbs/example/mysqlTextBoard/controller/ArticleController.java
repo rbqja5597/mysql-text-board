@@ -17,7 +17,25 @@ public class ArticleController {
 			showList(cmd);
 		} else if (cmd.startsWith("article detail ")) {
 			showDetail(cmd);
+		} else if (cmd.startsWith("article delete ")) {
+			doDelete(cmd);
 		}
+	}
+
+	private void doDelete(String cmd) {
+		System.out.println("== 게시물 삭제 ==");
+
+		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
+
+		Article article = articleService.getArticle(inputedId);
+
+		if (article == null) {
+			System.out.println("존재하지 않는 게시물 입니다.");
+			return;
+		}
+
+		articleService.delete(inputedId);
+		System.out.printf("%d번 게시물을 삭제하였습니다.\n", inputedId);
 	}
 
 	private void showList(String cmd) {
