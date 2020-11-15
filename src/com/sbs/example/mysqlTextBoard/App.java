@@ -3,20 +3,32 @@ package com.sbs.example.mysqlTextBoard;
 import java.util.Scanner;
 
 import com.sbs.example.mysqlTextBoard.controller.ArticleController;
+import com.sbs.example.mysqlTextBoard.controller.MemberController;
 
 public class App {
+	
+	private MemberController memberController;
+	private ArticleController articleController;
+	
+	public App() {
+		articleController = new ArticleController();
+		memberController = new MemberController();
+	}
+
 	public void run() {
 		Scanner sc = Container.scanner;
 
-		ArticleController articleController = new ArticleController();
+		
 
 		while (true) {
 			System.out.printf("명령어) ");
-			String cmd = sc.nextLine();
+			String command = sc.nextLine();
 
-			if (cmd.startsWith("article ")) {
-				articleController.doCommand(cmd);
-			} else if (cmd.equals("system exit")) {
+			if (command.startsWith("article ")) {
+				articleController.doCommand(command);
+			} else if (command.startsWith("member ")) {
+				memberController.doCommand(command);
+			} else if (command.equals("system exit")) {
 				System.out.println("== 시스템 종료 ==");
 				break;
 			}

@@ -12,6 +12,17 @@ import java.util.List;
 import com.sbs.example.mysqlTextBoard.dto.Article;
 
 public class ArticleDao {
+	
+	private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+	private final String DB_URL = "jdbc:mysql://127.0.0.1:3306/textBoard?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull&connectTimeout=60000&socketTimeout=60000";
+
+	private final String USER_NAME = "sbsst";
+	private final String PASSWORD = "sbs123414";
+	
+	Connection conn = null;
+	Statement state = null;
+	PreparedStatement pstmt;
+	ResultSet rs;
 
 	public List<Article> getArticles() {
 		List<Article> articles = new ArrayList<>();
@@ -233,6 +244,48 @@ public class ArticleDao {
 		}
 
 		return id;
+	}
+
+	public void modify(int inputedId, String title, String body) {
+		
+		String sql = "UPDATE article SET title=? ,body=? WHERE id = ?";
+
+		try {
+			
+			Class.forName(JDBC_DRIVER);
+			conn = DriverManager.getConnection(DB_URL, USER_NAME, PASSWORD);
+
+			// String sql = "UPDATE article SET title = ? WHERE `body` = ?";
+			PreparedStatement pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, title);
+			pstmt.setString(2, body);
+			pstmt.setInt(3, inputedId);
+
+			int rs = pstmt.executeUpdate();
+			
+
+			pstmt.close();
+			conn.close();
+		} catch (ClassNotFoundException e) {
+			System.out.println(e);
+		} catch (SQLException e) {
+			System.out.println(e);
+		} finally {
+			try {
+				if (state != null)
+					state.close();
+			} catch (SQLException ex1) {
+				System.out.println("Error !");
+			}
+
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException ex1) {
+
+			}
+		}
+		
 	}
 
 }
