@@ -67,6 +67,7 @@ public class MemberDao {
 				pstmt.setString(2, loginPw);
 				pstmt.setString(3, name);
 				pstmt.executeUpdate();
+				
 
 				ResultSet rs = pstmt.getGeneratedKeys();
 				rs.next();

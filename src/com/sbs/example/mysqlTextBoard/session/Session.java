@@ -1,4 +1,4 @@
-package com.sbs.example.session;
+package com.sbs.example.mysqlTextBoard.session;
 
 public class Session {
 

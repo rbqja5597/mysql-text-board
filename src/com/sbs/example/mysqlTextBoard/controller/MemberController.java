@@ -183,7 +183,7 @@ public class MemberController {
 		}
 
 		while (true) {
-			System.out.printf("이름 : ");
+			System.out.printf("이름: ");
 			name = sc.nextLine().trim();
 
 			if (name.length() == 0) {

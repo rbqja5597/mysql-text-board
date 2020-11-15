@@ -2,7 +2,7 @@ package com.sbs.example.mysqlTextBoard;
 
 import java.util.Scanner;
 
-import com.sbs.example.session.Session;
+import com.sbs.example.mysqlTextBoard.session.Session;
 
 public class Container {
 
