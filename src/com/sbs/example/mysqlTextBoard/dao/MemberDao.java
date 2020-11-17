@@ -8,8 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.sbs.example.mysqlTextBoard.dto.Article;
 import com.sbs.example.mysqlTextBoard.dto.Member;
+import com.sbs.example.mysqlutil.MysqlUtil;
+import com.sbs.example.mysqlutil.SecSql;
 
 public class MemberDao {
 	private List<Member> members;
@@ -34,69 +38,31 @@ public class MemberDao {
 	}
 	
 	public int join(String loginId, String loginPw, String name) {
-		int id = 0;
-		Connection con = null;
+		SecSql sql = new SecSql();
 
-		try {
-			String dbmsJdbcUrl = "jdbc:mysql://127.0.0.1:3306/textBoard?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull&connectTimeout=60000&socketTimeout=60000";
-			String dbmsLoginId = "sbsst";
-			String dbmsLoginPw = "sbs123414";
+		sql.append("INSERT INTO `member`");
+		sql.append(" SET regDate = NOW()");
+		sql.append(", updateDate = NOW()");
+		sql.append(", loginId = ?", loginId);
+		sql.append(", loginPw = ?", loginPw);
+		sql.append(", name = ?", name);
 
-			// MySQL 드라이버 등록
-			try {
-				Class.forName("com.mysql.cj.jdbc.Driver");
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-
-			// 연결 생성
-			try {
-				con = DriverManager.getConnection(dbmsJdbcUrl, dbmsLoginId, dbmsLoginPw);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
-			String sql = "INSERT INTO members";
-			sql += " SET loginId = ?";
-			sql += ", loginPw = ?";
-			sql += ", name = ?";
-
-			try {
-				PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-				pstmt.setString(1, loginId);
-				pstmt.setString(2, loginPw);
-				pstmt.setString(3, name);
-				pstmt.executeUpdate();
-				
-
-				ResultSet rs = pstmt.getGeneratedKeys();
-				rs.next();
-				id = rs.getInt(1);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-
-		} finally {
-			try {
-				if (con != null) {
-					con.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return id;
+		return MysqlUtil.insert(sql);
 	}
 
 	public Member getMemberByLoginId(String loginId) {
-		for (Member member : members) {
-			if (member.loginId.equals(loginId)) {
-				return member;
-			}
+		SecSql sql = new SecSql();
+		sql.append("SELECT *");
+		sql.append("FROM `member`");
+		sql.append("WHERE loginId = ?", loginId);
+		
+		Map<String, Object> map = MysqlUtil.selectRow(sql);
+		
+		if (map.isEmpty())  {
+			return null;
 		}
-
-		return null;
+		
+		return new Member(map);
 	}
 
 	public boolean isJoinAvailabelLoginId(String loginId) {
@@ -107,6 +73,21 @@ public class MemberDao {
 		}
 
 		return true;
+	}
+
+	public Member getMemberById(int id) {
+		SecSql sql = new SecSql();
+		sql.append("SELECT *");
+		sql.append("FROM `member`");
+		sql.append("WHERE id = ?", id);
+		
+		Map<String, Object> map = MysqlUtil.selectRow(sql);
+		
+		if (map.isEmpty())  {
+			return null;
+		}
+		
+		return new Member(map);
 	}
 
 	

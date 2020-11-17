@@ -5,22 +5,23 @@ import java.util.Scanner;
 import com.sbs.example.mysqlTextBoard.Container;
 import com.sbs.example.mysqlTextBoard.dto.Member;
 import com.sbs.example.mysqlTextBoard.service.MemberService;
+import com.sbs.example.mysqlTextBoard.session.Session;
 
-public class MemberController {
+public class MemberController extends Controller {
 
 	private MemberService memberService;
 	
 	public MemberController() {
-		memberService = new MemberService();
+		memberService = Container.memberService;
 	}
 
 	public void doCommand(String command) {
 		Scanner sc = new Scanner(System.in);
 
 		if (command.equals("member join")) {
-			join(sc, command);
+			dojoin(command);
 		} else if (command.equals("member login")) {
-			login(sc, command);
+			dologin(command);
 		} else if (command.equals("member whoami")) {
 			whoami(sc, command);
 		} else if (command.equals("member logout")) {
@@ -29,175 +30,125 @@ public class MemberController {
 
 	}
 
-	private void logout(Scanner sc, String command) {
-		System.out.println("== 로그아웃 ==");
+	private void dologin(String command) {
+		System.out.println("== 회원가입 ==");
+
+		Scanner sc = Container.scanner;
+
+		System.out.printf("로그인 아이디: ");
+		String loginId = sc.nextLine().trim();
 		
-		if (Container.session.isLogout()) {
+		if (loginId.length() == 0) {
+			System.out.println("로그인아이디를 입력해주세요");
+			return;
+		}
+		
+		Member member = memberService.getMemberByLoginId(loginId);
+
+		
+		if (member == null) {
+			System.out.println("존재하지 않는 회원입니다.");
+			return;
+		}
+		
+		
+		
+		System.out.printf("로그인비밀번호: ");
+		String loginPw = sc.nextLine().trim();
+		
+		if (loginPw.length() == 0) {
+			System.out.println("로그인비밀번호를 입력해주세요");
+			return;
+		}
+		
+		if (member.loginPw.equals(loginPw) == false ) {
+			System.out.println("비밀번호가 일치하지 않습니다.");
+			return;
+		}
+		
+		Container.session.login(member.id);
+		
+		System.out.printf("%s님 환영합니다.\n", member.name);
+		
+		
+	}
+
+	private void logout(Scanner sc, String command) {
+		System.out.println("== 로그아웃 == ");
+		
+		if (Container.session.isLogined() == false ) {
 			System.out.println("로그인 후 이용해주세요");
 			return;
 		}
+		
+		System.out.println("로그아웃 되었습니다.");
+		Container.session.logout();
 	}
 
 	private void whoami(Scanner sc, String command) {
-		if (Container.session.isLogout()) {
-			System.out.println("로그아웃 상태입니다.");
+		System.out.println("== 회원 확인 == ");
+		if (Container.session.isLogined() == false ) {
+			System.out.println("로그인 후 이용해주세요");
 			return;
 		}
-		int loginedMemberId = Container.session.loginedMemberId;
-		System.out.printf("당신의 회원번호는 %d번 입니다.\n", loginedMemberId);
 		
+		int loginedMemberId = Container.session.getLoginedMemberId();
+		Member member = memberService.getMemberById(loginedMemberId);
+		System.out.printf("번호 : %d\n", member.id);
+		System.out.printf("가입날짜 : %s\n", member.regDate);
+		System.out.printf("아이디 : %s\n", member.loginId);
+		System.out.printf("이름 : %s\n", member.name);
+	
 	}
 
-	private void login(Scanner sc, String command) {
-		System.out.println("== 로그인 ==");
-
-		if (Container.session.isLogined()) {
-			System.out.println("이미 로그인 되었습니다.");
-			return;
-		}
-
-		String loginId = "";
-		String loginPw;
-
-		int loginIdMaxCount = 3;
-		int loginIdCount = 0;
-		boolean loginIdIsValid = false;
-
-		Member member = null;
-
-		while (true) {
-			if (loginIdMaxCount <= loginIdCount) {
-				System.out.println("로그인을 취소합니다.");
-				break;
-			}
-
-			System.out.printf("로그인아이디 : ");
-			loginId = sc.nextLine().trim();
-
-			if (loginId.length() == 0) {
-				loginIdCount++;
-				continue;
-			}
-
-			member = memberService.getMemberByLoginId(loginId);
-
-			if (member == null) {
-				loginIdCount++;
-				System.out.printf("존재하지 않는 로그인아이디 입니다.\n", loginId);
-				continue;
-			}
-
-			loginIdIsValid = true;
-			break;
-		}
-
-		if (loginIdIsValid == false) {
-			return;
-		}
-
-		int loginPwMaxCount = 3;
-		int loginPwCount = 0;
-		boolean loginPwIsValid = false;
-
-		while (true) {
-			if (loginPwMaxCount <= loginPwCount) {
-				System.out.println("로그인을 취소합니다.");
-				break;
-			}
-
-			System.out.printf("로그인비번 : ");
-			loginPw = sc.nextLine().trim();
-
-			if (loginPw.length() == 0) {
-				loginPwCount++;
-				continue;
-			}
-
-			if (member.loginPw.equals(loginPw) == false) {
-				loginPwCount++;
-				System.out.printf("비밀번호가 일치하지 않습니다.\n");
-				continue;
-			}
-
-			loginPwIsValid = true;
-
-			break;
-		}
-
-		if (loginPwIsValid == false) {
-			return;
-		}
-
-		System.out.printf("로그인 되었습니다. %s님 환영합니다.\n", member.name);
-
-		Container.session.loginedMemberId = member.id;
-		
-	}
-
-	private void join(Scanner sc, String command) {
+	private void dojoin(String command) {
 		System.out.println("== 회원가입 ==");
 
-		String loginId = "";
-		String loginPw;
-		String name;
+		Scanner sc = Container.scanner;
 
-		int loginIdMaxCount = 3;
-		int loginIdCount = 0;
-		boolean loginIdIsValid = false;
-
-		while (true) {
-			if (loginIdMaxCount <= loginIdCount) {
-				System.out.println("회원가입을 취소합니다.");
-				break;
-			}
-
-			System.out.printf("로그인아이디 : ");
-			loginId = sc.nextLine().trim();
-
-			if (loginId.length() == 0) {
-				loginIdCount++;
-				continue;
-			} else if (memberService.isJoinAvailabelLoginId(loginId) == false) {
-				loginIdCount++;
-				System.out.printf("%s(은)는 이미 사용중인 로그인아이디 입니다.\n", loginId);
-				continue;
-			}
-
-			loginIdIsValid = true;
-			break;
-		}
-
-		if (loginIdIsValid == false) {
+		System.out.printf("로그인 아이디: ");
+		String loginId = sc.nextLine().trim();
+		
+		if (loginId.length() == 0) {
+			System.out.println("로그인아이디를 입력해주세요");
 			return;
 		}
 
-		while (true) {
-			System.out.printf("로그인비번 : ");
-			loginPw = sc.nextLine().trim();
-
-			if (loginPw.length() == 0) {
-				continue;
-			}
-
-			break;
+		System.out.printf("로그인비밀번호: ");
+		String loginPw = sc.nextLine().trim();
+		
+		if (loginPw.length() == 0) {
+			System.out.println("로그인비밀번호를 입력해주세요");
+			return;
+		}
+		
+		System.out.printf("로그인비밀번호확인: ");
+		String loginPwConfirm = sc.nextLine().trim();
+		
+		if (loginPwConfirm.length() == 0) {
+			System.out.println("로그인비밀번호확인을 입력해주세요");
+			return;
+		}
+		
+		if (loginPw.equals(loginPwConfirm) == false ) {
+			System.out.println("비밀번호가 일치하지 않습니다.");
+			return;
+		}
+		
+		System.out.printf("이름: ");
+		String name = sc.nextLine().trim();
+		
+		if (name.length() == 0) {
+			System.out.println("이름을 입력해주세요");
+			return;
 		}
 
-		while (true) {
-			System.out.printf("이름: ");
-			name = sc.nextLine().trim();
-
-			if (name.length() == 0) {
-				continue;
-			}
-
-			break;
-		}
+		int memberId = 1; // 임시 1
+		int boardId = 1; // 임시 1
 
 		int id = memberService.join(loginId, loginPw, name);
 
 		System.out.printf("%d번 회원이 생성되었습니다.\n", id);
-		
+
 	}
-
-
 }

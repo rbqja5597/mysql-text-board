@@ -1,37 +1,48 @@
 package com.sbs.example.mysqlTextBoard;
 
+
 import java.util.Scanner;
 
-import com.sbs.example.mysqlTextBoard.controller.ArticleController;
-import com.sbs.example.mysqlTextBoard.controller.MemberController;
+import com.sbs.example.mysqlTextBoard.controller.Controller;
+import com.sbs.example.mysqlutil.MysqlUtil;
 
 public class App {
-	
-	private MemberController memberController;
-	private ArticleController articleController;
-	
-	public App() {
-		articleController = new ArticleController();
-		memberController = new MemberController();
-	}
-
 	public void run() {
 		Scanner sc = Container.scanner;
 
-		
-
 		while (true) {
 			System.out.printf("명령어) ");
-			String command = sc.nextLine();
+			String cmd = sc.nextLine();
 
-			if (command.startsWith("article ")) {
-				articleController.doCommand(command);
-			} else if (command.startsWith("member ")) {
-				memberController.doCommand(command);
-			} else if (command.equals("system exit")) {
+			MysqlUtil.setDBInfo("127.0.0.1", "sbsst", "sbs123414", "textBoard");
+
+			boolean needToExit = false;
+
+			if (cmd.equals("system exit")) {
 				System.out.println("== 시스템 종료 ==");
+				needToExit = true;
+			} else {
+				Controller controller = getControllerByCmd(cmd);
+				if (controller != null) {
+					controller.doCommand(cmd);
+				}
+			}
+
+			MysqlUtil.closeConnection();
+
+			if (needToExit) {
 				break;
 			}
 		}
+	}
+
+	private Controller getControllerByCmd(String cmd) {
+		if (cmd.startsWith("article ")) {
+			return Container.articleController;
+		} else if (cmd.startsWith("member ")) {
+			return Container.memberController;
+		}
+
+		return null;
 	}
 }
