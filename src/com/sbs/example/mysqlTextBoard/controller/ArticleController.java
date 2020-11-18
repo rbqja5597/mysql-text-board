@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.sbs.example.mysqlTextBoard.Container;
 import com.sbs.example.mysqlTextBoard.dto.Article;
+import com.sbs.example.mysqlTextBoard.dto.Board;
 import com.sbs.example.mysqlTextBoard.dto.Member;
 import com.sbs.example.mysqlTextBoard.service.ArticleService;
 import com.sbs.example.mysqlTextBoard.service.MemberService;
@@ -28,12 +29,22 @@ public class ArticleController extends Controller {
 			doModify(cmd);
 		} else if (cmd.startsWith("article delete ")) {
 			doDelete(cmd);
-		} else if (cmd.startsWith("article write")) {
+		} else if (cmd.startsWith("article add")) {
 			doWrite(cmd);
+		} else if (cmd.startsWith("article makeBoard")) {
+			makeBoard(cmd);
+		} else if (cmd.startsWith("article selectBoard ")) {
+			selectBoard(cmd);
 		}
+
 	}
 
 	private void doModify(String cmd) {
+		if (Container.session.isLogined() == false) {
+			System.out.println("로그인 후 이용해주세요");
+			return;
+		}
+
 		System.out.println("== 게시물 수정 ==");
 
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
@@ -44,7 +55,7 @@ public class ArticleController extends Controller {
 			System.out.println("존재하지 않는 게시물 입니다.");
 			return;
 		}
-		
+
 		Member member = memberService.getMemberById(article.memberId);
 		String writer = member.name;
 
@@ -58,15 +69,19 @@ public class ArticleController extends Controller {
 
 		System.out.printf("내용 : ");
 		String body = sc.nextLine();
-		
+
 		articleService.modify(inputedId, title, body);
 
 		System.out.printf("%d번 게시물을 생성하였습니다.\n", inputedId);
 
 	}
-	
 
 	private void doWrite(String cmd) {
+		if (Container.session.isLogined() == false) {
+			System.out.println("로그인 후 이용해주세요");
+			return;
+		}
+
 		System.out.println("== 게시물 작성 ==");
 
 		Scanner sc = Container.scanner;
@@ -86,6 +101,11 @@ public class ArticleController extends Controller {
 	}
 
 	private void doDelete(String cmd) {
+		if (Container.session.isLogined() == false) {
+			System.out.println("로그인 후 이용해주세요");
+			return;
+		}
+
 		System.out.println("== 게시물 삭제 ==");
 
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
@@ -109,10 +129,8 @@ public class ArticleController extends Controller {
 		System.out.println("번호 / 작성 / 수정 / 작성자 / 제목");
 
 		for (Article article : articles) {
-			Member member = memberService.getMemberById(article.memberId);
-			String writer = member.name;
-			
-			System.out.printf("%d / %s / %s / %s / %s\n", article.id, article.regDate, article.updateDate,	writer , article.title);
+			System.out.printf("%d / %s / %s / %s / %s\n", article.id, article.regDate, article.updateDate, article.extra__writer,
+					article.title);
 		}
 	}
 
@@ -127,7 +145,7 @@ public class ArticleController extends Controller {
 			System.out.println("존재하지 않는 게시물 입니다.");
 			return;
 		}
-		
+
 		Member member = memberService.getMemberById(article.memberId);
 		String writer = member.name;
 
@@ -138,5 +156,39 @@ public class ArticleController extends Controller {
 		System.out.printf("제목 : %s\n", article.title);
 		System.out.printf("내용 : %s\n", article.body);
 	}
+
+	private void makeBoard(String command) {
+		Scanner sc = Container.scanner;
+
+		System.out.println("== 게시판 생성 ==");
+		System.out.printf("게시판 이름 : ");
+		String name = sc.nextLine();
+
+		int BoardId = articleService.makeBoard(name);
+
+		System.out.printf("%s(%d번) 게시판이 생성되었습니다.\n", name, BoardId);
+
+	}
+
+	private void selectBoard(String command) {
+		Scanner sc = Container.scanner;
+
+		int boardId = Integer.parseInt(command.split(" ")[2]);
+
+		System.out.println("== 게시판 선택 ==");
+
+		Board board = articleService.getBoardById(boardId);
+
+		if (board == null) {
+			System.out.printf("%d번 게시판은 존재하지 않습니다.\n", boardId);
+			return;
+		}
+
+		System.out.printf("%s 게시판으로 변경합니다.\n", board.name);
+		Container.session.selectedBoardId = board.id;
+
+	}
+	
+	
 
 }

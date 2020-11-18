@@ -31,6 +31,7 @@ public class MemberController extends Controller {
 	}
 
 	private void dologin(String command) {
+				
 		System.out.println("== 회원가입 ==");
 
 		Scanner sc = Container.scanner;
@@ -101,7 +102,7 @@ public class MemberController extends Controller {
 	
 	}
 
-	private void dojoin(String command) {
+	private void dojoin(String command) {	
 		System.out.println("== 회원가입 ==");
 
 		Scanner sc = Container.scanner;

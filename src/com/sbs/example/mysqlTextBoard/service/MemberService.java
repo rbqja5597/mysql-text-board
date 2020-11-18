@@ -16,10 +16,6 @@ public class MemberService {
 		return memberDao.getMemberByLoginId(id);
 	}
 
-	public boolean isJoinAvailabelLoginId(String loginId) {
-		return memberDao.isJoinAvailabelLoginId(loginId);
-	}
-
 	public int join(String loginId, String loginPw, String name) {
 		return memberDao.join(loginId, loginPw, name);
 	}

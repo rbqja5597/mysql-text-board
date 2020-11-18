@@ -1,6 +1,7 @@
 package com.sbs.example.mysqlTextBoard.dao;
 
 import java.sql.Connection;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+
 import com.sbs.example.mysqlTextBoard.dto.Article;
+import com.sbs.example.mysqlTextBoard.dto.Board;
+import com.sbs.example.mysqlTextBoard.dto.Member;
 import com.sbs.example.mysqlutil.MysqlUtil;
 import com.sbs.example.mysqlutil.SecSql;
 
@@ -31,13 +35,14 @@ public class ArticleDao {
 		List<Article> articles = new ArrayList<>();
 		
 		SecSql sql = new SecSql();
-		sql.append("SELECT *");
+		sql.append("SELECT article.*, member.name AS extra__writer");
 		sql.append("FROM article");
-		sql.append("ORDER BY id DESC");
+		sql.append("INNER JOIN member");
+		sql.append("ON article.memberId = member.Id");
 		
 		List<Map<String, Object>> articleMapList = MysqlUtil.selectRows(sql);
 		
-		for (  Map<String, Object> articleMap : articleMapList) {
+		for (Map<String, Object> articleMap : articleMapList) {
 			articles.add(new Article(articleMap));
 		}
 
@@ -100,4 +105,27 @@ public class ArticleDao {
 		
 	}
 
+	public int makeBoard(String name) {
+		SecSql sql = new SecSql();
+
+		sql.append("INSERT INTO board");
+		sql.append("SET `name` = ?", name);
+
+		return MysqlUtil.insert(sql);
+	}
+
+	public Board getBoardById(int id) {
+		SecSql sql = new SecSql();
+		sql.append("SELECT *");
+		sql.append("FROM `board`");
+		sql.append("WHERE id = ?", id);
+		
+		Map<String, Object> map = MysqlUtil.selectRow(sql);
+		
+		if (map.isEmpty())  {
+			return null;
+		}
+		
+		return new Board(map);
+	}
 }

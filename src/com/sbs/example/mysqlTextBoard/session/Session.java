@@ -3,6 +3,7 @@ package com.sbs.example.mysqlTextBoard.session;
 public class Session {
 
 	private int loginedMemberId;
+	public int selectedBoardId;
 	
 	public int getLoginedMemberId() {
 		return loginedMemberId;
@@ -12,7 +13,6 @@ public class Session {
 		loginedMemberId = 0;
 		
 	}
-
 	public void login(int id) {
 		loginedMemberId = id;
 	}
