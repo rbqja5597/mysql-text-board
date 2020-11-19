@@ -46,8 +46,12 @@ public class ArticleController extends Controller {
 
 	private void recommand(String cmd) {
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
+		System.out.printf("== 게시물 추천 ==");
 		
 		
+		
+		
+		System.out.printf("%d번 게시물 추천 \n", inputedId);
 		
 	}
 
@@ -87,6 +91,11 @@ public class ArticleController extends Controller {
 
 		if (article == null) {
 			System.out.println("존재하지 않는 게시물 입니다.");
+			return;
+		}
+		
+		if (article.memberId != Container.session.getLoginedMemberId()) {
+			System.out.println("권한이 없습니다");
 			return;
 		}
 
@@ -150,7 +159,13 @@ public class ArticleController extends Controller {
 			System.out.println("존재하지 않는 게시물 입니다.");
 			return;
 		}
-
+		
+		if (article.memberId != Container.session.getLoginedMemberId()) {
+			System.out.println("권한이 없습니다");
+			return;
+		}
+		
+		
 		articleService.delete(inputedId);
 		System.out.printf("%d번 게시물을 삭제하였습니다.\n", inputedId);
 	}
