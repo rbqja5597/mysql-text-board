@@ -1,20 +1,16 @@
 package com.sbs.example.mysqlTextBoard.dao;
 
 import java.sql.Connection;
-
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-
 import com.sbs.example.mysqlTextBoard.dto.Article;
+import com.sbs.example.mysqlTextBoard.dto.ArticleReply;
 import com.sbs.example.mysqlTextBoard.dto.Board;
-import com.sbs.example.mysqlTextBoard.dto.Member;
 import com.sbs.example.mysqlutil.MysqlUtil;
 import com.sbs.example.mysqlutil.SecSql;
 
@@ -38,15 +34,15 @@ public class ArticleDao {
 		sql.append("SELECT article.*, member.name AS extra__writer");
 		sql.append("FROM article");
 		sql.append("INNER JOIN member");
-		sql.append("ON article.memberId = member.Id");
+		sql.append("ON article.memberId = member.id");
+		sql.append("ORDER BY article.id DESC");
+		
 		
 		List<Map<String, Object>> articleMapList = MysqlUtil.selectRows(sql);
 		
 		for (Map<String, Object> articleMap : articleMapList) {
 			articles.add(new Article(articleMap));
 		}
-
-		
 		return articles;
 	}
 
@@ -127,5 +123,31 @@ public class ArticleDao {
 		}
 		
 		return new Board(map);
+	}
+
+	public int reply(String body, String writer) {
+		SecSql sql = new SecSql();
+
+		sql.append("INSERT INTO articlereply");
+		sql.append("SET writer = ?", writer);
+		sql.append(", body = ?", body);
+		sql.append(", regDate = NOW()");
+
+		return MysqlUtil.insert(sql);
+	}
+
+	public ArticleReply getReply(int id) {
+		SecSql sql = new SecSql();
+		sql.append("SELECT *");
+		sql.append("FROM articlereply");
+		sql.append("WHERE id = ?", id);
+		
+		Map<String, Object> map = MysqlUtil.selectRow(sql);
+		
+		if (map.isEmpty())  {
+			return null;
+		}
+		
+		return new ArticleReply(map);
 	}
 }

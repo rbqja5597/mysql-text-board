@@ -20,18 +20,11 @@ public class Article {
 		this.body = (String) map.get("body");
 		this.memberId = (int) map.get("memberId");
 		this.boardId = (int) map.get("boardId");
-		this.extra__writer = (String) map.get("extra__writer");
+		if (map.containsKey("extra__writer")) {
+			this.extra__writer = (String) map.get("extra__writer");
+		}
 	}
 
-	public Article(int id, String regDate, String updateDate, String title, String body, int memberId, int boardId) {
-		this.id = id;
-		this.regDate = regDate;
-		this.updateDate = updateDate;
-		this.title = title;
-		this.body = body;
-		this.memberId = memberId;
-		this.boardId = boardId;
-	}
 
 	@Override
 	public String toString() {
