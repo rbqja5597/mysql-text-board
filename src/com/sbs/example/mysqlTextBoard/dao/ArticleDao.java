@@ -151,5 +151,24 @@ public class ArticleDao {
 		return new ArticleReply(map);
 	}
 
+	public List<Board> getboards() {
+		List<Board> boards = new ArrayList<>();
+		
+		SecSql sql = new SecSql();
+		sql.append("SELECT board.*");
+		sql.append("FROM board");
+		sql.append("INNER JOIN article");
+		sql.append("ON board.id = article.id");
+		sql.append("ORDER BY board.id DESC");
+		
+		
+		List<Map<String, Object>> boardMapList = MysqlUtil.selectRows(sql);
+		
+		for (Map<String, Object> boardMap : boardMapList) {
+			boards.add(new Board(boardMap));
+		}
+		return boards;
+	}
+
 
 }

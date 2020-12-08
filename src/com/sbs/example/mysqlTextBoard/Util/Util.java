@@ -1,9 +1,11 @@
 package com.sbs.example.mysqlTextBoard.Util;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -85,5 +87,18 @@ public class Util {
 		if (dir.exists() == false) {
 			dir.mkdirs();
 		}
+	}
+
+	public static void writeFile(String path, String body) {
+		File file = new File(path);
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			writer.write(body);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }

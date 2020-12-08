@@ -51,6 +51,10 @@ public class ArticleService {
 		return articleDao.getReply(id);
 	}
 
+	public List<Board> getboards() {
+		return articleDao.getboards();
+	}
+
 
 
 

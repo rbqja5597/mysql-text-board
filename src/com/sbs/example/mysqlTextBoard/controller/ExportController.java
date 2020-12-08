@@ -1,6 +1,5 @@
 package com.sbs.example.mysqlTextBoard.controller;
 
-import java.io.File;
 import java.util.Scanner;
 
 import com.sbs.example.mysqlTextBoard.Container;
@@ -19,9 +18,28 @@ public class ExportController extends Controller{
 
 	@Override
 	public void doCommand(String command) {
-		if (command.startsWith("export html")) {
+		if (command.startsWith("build html")) {
 			dohtml(command);
+		} else if (command.startsWith("build site")) {
+			BuildSite(command);
+		} else if (command.startsWith("build list")) {
+			Buildlist(command);
 		} 
+	
+		
+	}
+
+
+
+	private void Buildlist(String command) {
+		System.out.println("== 게시물 리스트 html 생성 ==");
+		exportService.Buildlist();
+		
+	}
+
+	private void BuildSite(String command) {
+		System.out.println("== 게시물 상세페이지 html 생성 ==");
+		exportService.buildSite();
 		
 	}
 

@@ -43,7 +43,7 @@ public class App {
 			return Container.articleController;
 		} else if (cmd.startsWith("member")) {
 			return Container.memberController;
-		} else if (cmd.startsWith("export")) {
+		} else if (cmd.startsWith("build")) {
 			return Container.exportController;
 		}
 
