@@ -60,6 +60,8 @@ public class ArticleController extends Controller {
 		
 		System.out.println("== 댓글 작성 ==");
 		
+		
+		
 
 		Scanner sc = Container.scanner;
 	
@@ -208,6 +210,10 @@ public class ArticleController extends Controller {
 		System.out.printf("내용 : %s\n", article.body);
 		
 		System.out.println("== 댓글 리스트 ==");
+		if (reply == null) {
+			System.out.println("댓글이 존재하지 않습니다.");
+		}
+		
 		System.out.printf("작성날짜 : %s\n", reply.regDate);
 		System.out.printf("작성자 : %s\n", writer);		
 		System.out.printf("내용 : %s\n", reply.body);

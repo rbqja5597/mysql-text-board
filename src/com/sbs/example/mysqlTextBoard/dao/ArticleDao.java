@@ -14,13 +14,13 @@ import com.sbs.example.mysqlTextBoard.dto.Board;
 import com.sbs.example.mysqlutil.MysqlUtil;
 import com.sbs.example.mysqlutil.SecSql;
 
-public class ArticleDao {
-	
-	private final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-	private final String DB_URL = "jdbc:mysql://127.0.0.1:3306/textBoard?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Seoul&useOldAliasMetadataBehavior=true&zeroDateTimeNehavior=convertToNull&connectTimeout=60000&socketTimeout=60000";
+import jdk.nashorn.internal.runtime.regexp.JoniRegExp.Factory;
 
-	private final String USER_NAME = "sbsst";
-	private final String PASSWORD = "sbs123414";
+public class ArticleDao {
+		
+	public ArticleDao() {
+		
+	}
 	
 	Connection conn = null;
 	Statement state = null;
@@ -150,4 +150,6 @@ public class ArticleDao {
 		
 		return new ArticleReply(map);
 	}
+
+
 }

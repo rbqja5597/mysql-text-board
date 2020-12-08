@@ -3,6 +3,7 @@ package com.sbs.example.mysqlTextBoard;
 
 import java.util.Scanner;
 
+
 import com.sbs.example.mysqlTextBoard.controller.Controller;
 import com.sbs.example.mysqlutil.MysqlUtil;
 
@@ -14,7 +15,7 @@ public class App {
 			System.out.printf("명령어) ");
 			String cmd = sc.nextLine();
 
-			MysqlUtil.setDBInfo("127.0.0.1", "sbsst", "sbs123414", "textBoard");
+			MysqlUtil.setDBInfo("127.0.0.1", "sbsst", "sbs123414", "text");
 			//MysqlUtil.setDevMode(true);
 			
 			boolean needToExit = false;
@@ -38,10 +39,12 @@ public class App {
 	}
 
 	private Controller getControllerByCmd(String cmd) {
-		if (cmd.startsWith("article ")) {
+		if (cmd.startsWith("article")) {
 			return Container.articleController;
-		} else if (cmd.startsWith("member ")) {
+		} else if (cmd.startsWith("member")) {
 			return Container.memberController;
+		} else if (cmd.startsWith("export")) {
+			return Container.exportController;
 		}
 
 		return null;
