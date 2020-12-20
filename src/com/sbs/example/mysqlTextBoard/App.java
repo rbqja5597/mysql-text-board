@@ -15,7 +15,7 @@ public class App {
 			System.out.printf("명령어) ");
 			String cmd = sc.nextLine();
 
-			MysqlUtil.setDBInfo("127.0.0.1", "sbsst", "sbs123414", "text");
+			MysqlUtil.setDBInfo("127.0.0.1", "sbsst", "sbs123414", "textboard");
 			//MysqlUtil.setDevMode(true);
 			
 			boolean needToExit = false;
@@ -44,7 +44,7 @@ public class App {
 		} else if (cmd.startsWith("member")) {
 			return Container.memberController;
 		} else if (cmd.startsWith("build")) {
-			return Container.exportController;
+			return Container.buildController;
 		}
 
 		return null;

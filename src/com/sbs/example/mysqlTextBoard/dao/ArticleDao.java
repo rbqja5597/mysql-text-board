@@ -14,8 +14,6 @@ import com.sbs.example.mysqlTextBoard.dto.Board;
 import com.sbs.example.mysqlutil.MysqlUtil;
 import com.sbs.example.mysqlutil.SecSql;
 
-import jdk.nashorn.internal.runtime.regexp.JoniRegExp.Factory;
-
 public class ArticleDao {
 		
 	public ArticleDao() {
