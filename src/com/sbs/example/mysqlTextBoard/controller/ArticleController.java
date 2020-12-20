@@ -1,12 +1,10 @@
 package com.sbs.example.mysqlTextBoard.controller;
 
 import java.util.List;
-
 import java.util.Scanner;
 
 import com.sbs.example.mysqlTextBoard.Container;
 import com.sbs.example.mysqlTextBoard.dto.Article;
-import com.sbs.example.mysqlTextBoard.dto.ArticleReply;
 import com.sbs.example.mysqlTextBoard.dto.Board;
 import com.sbs.example.mysqlTextBoard.dto.Member;
 import com.sbs.example.mysqlTextBoard.service.ArticleService;
@@ -22,7 +20,12 @@ public class ArticleController extends Controller {
 	}
 
 	public void doCommand(String cmd) {
-		if (cmd.startsWith("article list")) {
+		if (cmd.startsWith("article makeBoard")) {
+			doMakeBoard(cmd);
+		}
+		if (cmd.startsWith("article selectBoard")) {
+			doSelectBoard(cmd);
+		} else if (cmd.startsWith("article list")) {
 			showList(cmd);
 		} else if (cmd.startsWith("article detail ")) {
 			showDetail(cmd);
@@ -30,62 +33,85 @@ public class ArticleController extends Controller {
 			doModify(cmd);
 		} else if (cmd.startsWith("article delete ")) {
 			doDelete(cmd);
-		} else if (cmd.startsWith("article add")) {
+		} else if (cmd.startsWith("article write")) {
 			doWrite(cmd);
-		} else if (cmd.startsWith("article makeBoard")) {
-			makeBoard(cmd);
-		} else if (cmd.startsWith("article selectBoard ")) {
-			selectBoard(cmd);
-		} else if (cmd.startsWith("article reply ")) {
-			reply(cmd);
-		} else if (cmd.startsWith("article recommand ")) {
-			recommand(cmd);
+		}
+	}
+
+	private void doSelectBoard(String cmd) {
+		System.out.println("== 게시판 선택 ==");
+
+		System.out.println("= 게시판 목록 =");
+		System.out.println("번호 / 생성날짜 / 코드 / 이름 / 게시물 수");
+
+		List<Board> boards = articleService.getForPrintBoards();
+
+		for (Board board : boards) {
+			int articlesCount = articleService.getArticlesCount(board.id);
+			System.out.printf("%d / %s / %s / %s / %d\n", board.id, board.regDate, board.code, board.name,
+					articlesCount);
 		}
 
+		System.out.printf("게시판 코드 : ");
+		String inputedBoardCode = Container.scanner.nextLine().trim();
+
+		Board board = articleService.getBoardByCode(inputedBoardCode);
+
+		if (board == null) {
+			System.out.println("코드를 잘 못 입력하였습니다.");
+			return;
+		}
+		
+		Container.session.setCurrentBoardCode(board.code);
+
+		System.out.printf("%s 게시판으로 변경합니다.\n", board.name);
 	}
 
-	private void recommand(String cmd) {
-		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
-		System.out.printf("== 게시물 추천 ==");
-		
-		
-		
-		
-		System.out.printf("%d번 게시물 추천 \n", inputedId);
-		
-	}
+	private void doMakeBoard(String cmd) {
+		System.out.println("== 게시판 작성 ==");
 
-	private void reply(String cmd) {
-		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
-		
-		System.out.println("== 댓글 작성 ==");
-		
-		
-		
-
-		Scanner sc = Container.scanner;
-	
-		System.out.printf("내용 : ");
-		String body = sc.nextLine();
-		
-		Article article = articleService.getArticle(inputedId);
-		
-		Member member = memberService.getMemberById(article.memberId);
-		String writer = member.name;
-
-		articleService.reply(body, writer);
-
-		System.out.printf("%d번 댓글 등록 .\n", inputedId);
-		
-	}
-
-	private void doModify(String cmd) {
 		if (Container.session.isLogined() == false) {
-			System.out.println("로그인 후 이용해주세요");
+			System.out.println("로그인 후 이용해주세요.");
 			return;
 		}
 
+		Member member = memberService.getMemberById(Container.session.getLoginedMemberId());
+
+		if (member.isAdmin() == false) {
+			System.out.println("관리자만 게시판을 생성할 수 있습니다.");
+			return;
+		}
+
+		Scanner sc = Container.scanner;
+
+		System.out.printf("이름 : ");
+		String name = sc.nextLine();
+
+		if (articleService.isMakeBoardAvailableName(name) == false) {
+			System.out.println("해당 이름은 이미 사용중입니다.");
+			return;
+		}
+
+		System.out.printf("코드 : ");
+		String code = sc.nextLine();
+
+		if (articleService.isMakeBoardAvailableCode(code) == false) {
+			System.out.println("해당 코드는 이미 사용중입니다.");
+			return;
+		}
+
+		int id = articleService.makeBoard(code, name);
+
+		System.out.printf("%d번 게시판을 생성하였습니다.\n", id);
+	}
+
+	private void doModify(String cmd) {
 		System.out.println("== 게시물 수정 ==");
+
+		if (Container.session.isLogined() == false) {
+			System.out.println("로그인 후 이용해주세요.");
+			return;
+		}
 
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
 
@@ -95,9 +121,9 @@ public class ArticleController extends Controller {
 			System.out.println("존재하지 않는 게시물 입니다.");
 			return;
 		}
-		
+
 		if (article.memberId != Container.session.getLoginedMemberId()) {
-			System.out.println("권한이 없습니다");
+			System.out.println("권한이 없습니다.");
 			return;
 		}
 
@@ -107,6 +133,7 @@ public class ArticleController extends Controller {
 		System.out.printf("번호 : %d\n", article.id);
 		System.out.printf("작성날짜 : %s\n", article.regDate);
 		System.out.printf("작성자 : %s\n", writer);
+
 		Scanner sc = Container.scanner;
 
 		System.out.printf("제목 : ");
@@ -118,16 +145,15 @@ public class ArticleController extends Controller {
 		articleService.modify(inputedId, title, body);
 
 		System.out.printf("%d번 게시물을 생성하였습니다.\n", inputedId);
-
 	}
 
 	private void doWrite(String cmd) {
+		System.out.println("== 게시물 작성 ==");
+
 		if (Container.session.isLogined() == false) {
-			System.out.println("로그인 후 이용해주세요");
+			System.out.println("로그인 후 이용해주세요.");
 			return;
 		}
-
-		System.out.println("== 게시물 작성 ==");
 
 		Scanner sc = Container.scanner;
 
@@ -138,7 +164,7 @@ public class ArticleController extends Controller {
 		String body = sc.nextLine();
 
 		int memberId = Container.session.getLoginedMemberId();
-		int boardId = Container.session.selectedBoardId;
+		int boardId = 1; // 임시 1
 
 		int id = articleService.write(boardId, memberId, title, body);
 
@@ -146,12 +172,12 @@ public class ArticleController extends Controller {
 	}
 
 	private void doDelete(String cmd) {
+		System.out.println("== 게시물 삭제 ==");
+
 		if (Container.session.isLogined() == false) {
-			System.out.println("로그인 후 이용해주세요");
+			System.out.println("로그인 후 이용해주세요.");
 			return;
 		}
-
-		System.out.println("== 게시물 삭제 ==");
 
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
 
@@ -161,26 +187,29 @@ public class ArticleController extends Controller {
 			System.out.println("존재하지 않는 게시물 입니다.");
 			return;
 		}
-		
+
 		if (article.memberId != Container.session.getLoginedMemberId()) {
-			System.out.println("권한이 없습니다");
+			System.out.println("권한이 없습니다.");
 			return;
 		}
-		
-		
+
 		articleService.delete(inputedId);
 		System.out.printf("%d번 게시물을 삭제하였습니다.\n", inputedId);
 	}
 
 	private void showList(String cmd) {
-		System.out.println("== 게시물 리스트 ==");
+		String boardCode = Container.session.getCurrentBoardCode();
+		Board board = articleService.getBoardByCode(boardCode);
+		System.out.printf("== %s 게시물 리스트 ==\n", board.name);
 
-		List<Article> articles = articleService.getArticles();
+		List<Article> articles = articleService.getForPrintArticles(board.id);
 
 		System.out.println("번호 / 작성 / 수정 / 작성자 / 제목");
 
 		for (Article article : articles) {
-			System.out.printf("%d / %s / %s / %s / %s\n", article.id, article.regDate, article.updateDate, article.extra__writer ,
+			String writer = article.extra__writer;
+
+			System.out.printf("%d / %s / %s / %s / %s\n", article.id, article.regDate, article.updateDate, writer,
 					article.title);
 		}
 	}
@@ -191,8 +220,6 @@ public class ArticleController extends Controller {
 		int inputedId = Integer.parseInt(cmd.split(" ")[2]);
 
 		Article article = articleService.getArticle(inputedId);
-		
-		ArticleReply reply = articleService.getReply(inputedId);
 
 		if (article == null) {
 			System.out.println("존재하지 않는 게시물 입니다.");
@@ -208,51 +235,5 @@ public class ArticleController extends Controller {
 		System.out.printf("작성자 : %s\n", writer);
 		System.out.printf("제목 : %s\n", article.title);
 		System.out.printf("내용 : %s\n", article.body);
-		
-		System.out.println("== 댓글 리스트 ==");
-		if (reply == null) {
-			System.out.println("댓글이 존재하지 않습니다.");
-		}
-		
-		System.out.printf("작성날짜 : %s\n", reply.regDate);
-		System.out.printf("작성자 : %s\n", writer);		
-		System.out.printf("내용 : %s\n", reply.body);
-
-		
 	}
-
-	private void makeBoard(String command) {
-		Scanner sc = Container.scanner;
-
-		System.out.println("== 게시판 생성 ==");
-		System.out.printf("게시판 이름 : ");
-		String name = sc.nextLine();
-
-		int BoardId = articleService.makeBoard(name);
-
-		System.out.printf("%s(%d번) 게시판이 생성되었습니다.\n", name, BoardId);
-
-	}
-
-	private void selectBoard(String command) {
-		Scanner sc = Container.scanner;
-
-		int boardId = Integer.parseInt(command.split(" ")[2]);
-
-		System.out.println("== 게시판 선택 ==");
-
-		Board board = articleService.getBoardById(boardId);
-
-		if (board == null) {
-			System.out.printf("%d번 게시판은 존재하지 않습니다.\n", boardId);
-			return;
-		}
-
-		System.out.printf("%s 게시판으로 변경합니다.\n", board.name);
-		Container.session.selectedBoardId = board.id;
-
-	}
-	
-	
-
 }

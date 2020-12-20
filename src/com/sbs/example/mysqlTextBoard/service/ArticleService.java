@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sbs.example.mysqlTextBoard.dao.ArticleDao;
 import com.sbs.example.mysqlTextBoard.dto.Article;
-import com.sbs.example.mysqlTextBoard.dto.ArticleReply;
 import com.sbs.example.mysqlTextBoard.dto.Board;
 
 public class ArticleService {
@@ -30,35 +29,45 @@ public class ArticleService {
 		return articleDao.add(boardId, memberId, title, body);
 	}
 
-	public void modify(int id, String title, String body) {
-		articleDao.modify(id, title, body);
-		
+	public int modify(int id, String title, String body) {
+		return articleDao.modify(id, title, body);
 	}
 
-	public int makeBoard(String name) {
-		return articleDao.makeBoard(name);
+	public List<Article> getForPrintArticles(int boardId) {
+		return articleDao.getForPrintArticles(boardId);
+	}
+	
+	public List<Article> getForPrintArticles() {
+		return articleDao.getForPrintArticles(0);
 	}
 
-	public Board getBoardById(int id) {
-		return articleDao.getBoardById(id);
+	public Board getBoardByCode(String boardCode) {
+		return articleDao.getBoardByCode(boardCode);
 	}
 
-	public int reply(String body, String writer) {
-		return articleDao.reply(body, writer);
+	public boolean isMakeBoardAvailableName(String name) {
+		Board board = articleDao.getBoardByName(name);
+
+		return board == null;
 	}
 
-	public ArticleReply getReply(int id) {
-		return articleDao.getReply(id);
+	public boolean isMakeBoardAvailableCode(String code) {
+		Board board = articleDao.getBoardByCode(code);
+
+		return board == null;
 	}
 
-	public List<Board> getboards() {
-		return articleDao.getboards();
+	public int makeBoard(String code, String name) {
+		return articleDao.makeBoard(code, name);
 	}
 
+	public List<Board> getForPrintBoards() {
+		return articleDao.getForPrintBoards();
+	}
 
+	public int getArticlesCount(int boardId) {
+		return articleDao.getArticlesCount(boardId);
+	}
 
-
-
-
-
+	
 }
