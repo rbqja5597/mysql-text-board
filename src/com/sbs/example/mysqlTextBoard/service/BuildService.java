@@ -25,9 +25,106 @@ public class BuildService {
 		Util.copy("site_template/app.css", "site/app.css");
 				
 		buildIndexPage();
+		buildArticleListPages();
 		buildArticleDetailPages();
 	}
+	
+	private void buildArticleListPage(Board board, int itemsInAPage, int pageBoxMenuSize, List<Article> articles, int page) {
+		StringBuilder sb = new StringBuilder();
+		
+		// 헤더 시작
+		sb.append(getHeadHtml("article_list_" + board.code));
+		
+		// 바디 시작
+		String bodyTemplate = Util.getFileContents("site_template/article_list.html");
+		
+		StringBuilder mainContent = new StringBuilder();
 
+		int articlesCount = articles.size();
+		int start = (page - 1) * itemsInAPage;
+		
+		int end = start + itemsInAPage - 1;
+		
+		if (end >= articlesCount) {
+			end = articlesCount - 1;
+		}
+		
+		for ( int i = start; i <= end; i++) {
+			Article article = articles.get(i);
+			
+			String link = "article_detail_" + article.id + ".html";
+
+			mainContent.append("<div>");
+			mainContent.append("<div class=\"article-list__cell-id\">" + article.id + "</div>");
+			mainContent.append("<div class=\"article-list__cell-reg-date\">" + article.regDate + "</div>");
+			mainContent.append("<div class=\"article-list__cell-writer\">" + article.extra__writer + "</div>");
+			mainContent.append("<div class=\"article-list__cell-title\">");
+
+			mainContent.append("<a href=\"" + link + "\" class=\"hover-underline\">" + article.title + "</a>");
+
+			mainContent.append("</div>");
+			mainContent.append("</div>");
+		}
+
+		StringBuilder pageMenuContent = new StringBuilder();
+		
+		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c\">&lt; 이전</a></li>");
+		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c article-page-menu__link--selected\">1</a></li>");
+		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c\">다음 &gt;</a></li>");
+		
+		String body = bodyTemplate.replace("${article_list__main-content}", mainContent.toString());
+		body = body.replace("${article_page__menu-content} ", pageMenuContent.toString());
+		
+		
+		sb.append(body);
+		
+		// 푸터 시작
+		sb.append(Util.getFileContents("site_template/foot.html"));
+		
+		// 파일 생성
+		String fileName = "article_list_" + board.code + "_" + page +"_1.html";
+		String filePath = "site/" + fileName;
+
+		Util.writeFile(filePath, sb.toString());
+		System.out.println(filePath + " 생성");
+	}
+
+	private void buildArticleListPages() {
+		List<Board> boards = articleService.getForPrintBoards();
+		
+		int itemsInAPage = 10;
+		int pageBoxMenuSize = 10;
+		
+		for (Board board : boards) {
+			List<Article> articles = articleService.getForPrintArticles(board.id);
+			int articlesCount = articles.size();
+			int totalPage = (int)Math.ceil((double)articlesCount / itemsInAPage ); 
+			
+			for (int i= 1; i <= totalPage; i++) {
+				buildArticleListPage(board, itemsInAPage, pageBoxMenuSize, articles, i);
+			}
+			
+			
+			StringBuilder mainContent = new StringBuilder();
+
+			
+			
+			for (Article article : articles) {
+				String link = "article_detail_" + article.id + ".html";
+
+				mainContent.append("<div>");
+				mainContent.append("<div class=\"article-list__cell-id\">" + article.id + "</div>");
+				mainContent.append("<div class=\"article-list__cell-reg-date\">" + article.regDate + "</div>");
+				mainContent.append("<div class=\"article-list__cell-writer\">" + article.extra__writer + "</div>");
+				mainContent.append("<div class=\"article-list__cell-title\">");
+
+				mainContent.append("<a href=\"" + link + "\" class=\"hover-underline\">" + article.title + "</a>");
+
+				mainContent.append("</div>");
+				mainContent.append("</div>");
+			}
+		}
+	}
 	private void buildIndexPage() {
 		StringBuilder sb = new StringBuilder();
 		
@@ -99,22 +196,7 @@ public class BuildService {
 				
 				boardMenuContentHtml.append("<a href=\"" + link + "\" class=\"block\">");
 				
-				String iClass = "fas fa-clipboard-list";
-				
-				if (board.code.contains("notice")) {
-					iClass = "fas fa-flag";
-				}
-				else if (board.code.contains("free")) {
-					iClass = "fab fa-free-code-camp";
-				}			
-				
-				boardMenuContentHtml.append("<i class=\"" + iClass + "\"></i>");
-				
-				boardMenuContentHtml.append(" ");
-				
-				boardMenuContentHtml.append("<span>");
-				boardMenuContentHtml.append(board.name);
-				boardMenuContentHtml.append("</span>");
+				boardMenuContentHtml.append(getTitleBarContentByPageName("article_list_" + board.code));
 				
 				boardMenuContentHtml.append("</a>");
 				
@@ -123,18 +205,26 @@ public class BuildService {
 			
 			head = head.replace("${menu-bar__menu-1__board-menu-content}", boardMenuContentHtml.toString());
 			
-			String titleBarContentHtml = getTitleBarContentByFileName(pageName);
+			String titleBarContentHtml = getTitleBarContentByPageName(pageName);
 			
 			head = head.replace("${title-bar__content}", titleBarContentHtml);
 
 			return head;
 	}
 
-	private String getTitleBarContentByFileName(String pageName) {
+	private String getTitleBarContentByPageName(String pageName) {
 		if (pageName.equals("index")) {
-			return "<i class=\"fas fa-home\"></i><span>HOME</span>";
+			return "<i class=\"fas fa-home\"></i> <span>HOME</span>";
+		} else if (pageName.equals("article_detail")) {
+			return "<i class=\"fas fa-file-alt\"></i> <span>ARTICLE DETAIL</span>";
+		} else if (pageName.startsWith("article_list_free")) {
+			return "<i class=\"fab fa-free-code-camp\"></i> <span>FREE LIST</span>";
+		} else if (pageName.startsWith("article_list_notice")) {
+			return "<i class=\"fas fa-flag\"></i> <span>NOTICE LIST</span>";
+		} else if (pageName.startsWith("article_list_")) {
+			return "<i class=\"fas fa-clipboard-list\"></i> <span>NOTICE LIST</span>";
 		}
-		
+
 		return "";
 	}
 }

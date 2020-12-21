@@ -87,6 +87,20 @@ updateDate = NOW(),
 `name` = '자유',
 `code` = 'free';
 
+
 UPDATE article
 SET boardId = 2
 LIMIT 2;
+
+#게시물 랜덤 생성
+
+SELECT * FROM article;
+
+INSERT INTO article
+SET regDate = NOW(),
+updateDate = NOW(),
+title = CONCAT("제목_", RAND()),
+`body` = CONCAT("내용_", RAND()),
+memberId = IF(RAND() > 0.5, 1, 2),
+boardId = IF(RAND() > 0.5, 1, 2);
+
