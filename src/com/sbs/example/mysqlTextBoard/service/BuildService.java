@@ -24,12 +24,35 @@ public class BuildService {
 		
 		Util.copy("site_template/app.css", "site/app.css");
 				
+		buildIndexPage();
+		buildArticleDetailPages();
+	}
+
+	private void buildIndexPage() {
+		StringBuilder sb = new StringBuilder();
+		
+		String head = getHeadHtml("index");		
+		String foot = Util.getFileContents("site_template/foot.html");
+		
+		String mainHtml = Util.getFileContents("site_template/index.html");
+		
+		sb.append(head);
+		sb.append(mainHtml);
+		sb.append(foot);
+		
+		String filePath = "site/index.html";
+		Util.writeFile(filePath, sb.toString());
+		System.out.println(filePath + " 생성");
+	}
+
+	private void buildArticleDetailPages() {
 		List<Article> articles = articleService.getArticles();
 		
-		String head = getHeadHtml();		
-		
-		
+		String head = getHeadHtml("article_detail");		
 		String foot = Util.getFileContents("site_template/foot.html");
+		
+		
+		// 게시물 상세페이지 생성 
 		
 		for (Article article : articles) {
 			StringBuilder sb = new StringBuilder();
@@ -59,9 +82,10 @@ public class BuildService {
 			System.out.println(filePath + " 생성");
 			
 		}	
+		
 	}
 
-	private String getHeadHtml() {
+	private String getHeadHtml(String pageName) {
 		String head = Util.getFileContents("site_template/head.html");
 			
 			StringBuilder boardMenuContentHtml = new StringBuilder();
@@ -99,6 +123,18 @@ public class BuildService {
 			
 			head = head.replace("${menu-bar__menu-1__board-menu-content}", boardMenuContentHtml.toString());
 			
+			String titleBarContentHtml = getTitleBarContentByFileName(pageName);
+			
+			head = head.replace("${title-bar__content}", titleBarContentHtml);
+
 			return head;
+	}
+
+	private String getTitleBarContentByFileName(String pageName) {
+		if (pageName.equals("index")) {
+			return "<i class=\"fas fa-home\"></i><span>HOME</span>";
+		}
+		
+		return "";
 	}
 }
