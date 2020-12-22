@@ -19,7 +19,6 @@ public class BuildService {
 
 	public void buildSite() {
 		System.out.println("site/article 폴더 생성");
-		Util.rmdir("site");
 		Util.mkdirs("site");
 		
 		Util.copy("site_template/app.css", "site/app.css");
@@ -29,7 +28,7 @@ public class BuildService {
 		buildArticleDetailPages();
 	}
 	
-	private void buildArticleListPage(Board board, int itemsInAPage, int pageBoxMenuSize, List<Article> articles, int page) {
+	private void buildArticleListPage(Board board, int itemsInAPage, int pageBoxSize, List<Article> articles, int page) {
 		StringBuilder sb = new StringBuilder();
 		
 		// 헤더 시작
@@ -52,7 +51,7 @@ public class BuildService {
 		for ( int i = start; i <= end; i++) {
 			Article article = articles.get(i);
 			
-			String link = "article_detail_" + article.id + ".html";
+			String link = getArticleDetailFileName(article.id);
 
 			mainContent.append("<div>");
 			mainContent.append("<div class=\"article-list__cell-id\">" + article.id + "</div>");
@@ -68,13 +67,70 @@ public class BuildService {
 
 		StringBuilder pageMenuContent = new StringBuilder();
 		
-		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c\">&lt; 이전</a></li>");
-		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c article-page-menu__link--selected\">1</a></li>");
-		pageMenuContent.append("<li><a href=\"#\" class=\"flex flex-ai-c\">다음 &gt;</a></li>");
+
+		// 토탈 페이지 계산
+		int totalPage = (int)Math.ceil((double)articlesCount / itemsInAPage);
+		
+		// 현재 페이지 계산
+		if ( page < 1 ) {
+			page = 1;
+		}
+
+		if ( page > totalPage ) {
+			page = totalPage;
+		}
+		
+		// 현재 페이지 박스 시작, 끝 계산
+		int previousPageBoxesCount = (page - 1) / pageBoxSize;
+		int pageBoxStartPage = pageBoxSize * previousPageBoxesCount + 1;
+		int pageBoxEndPage = pageBoxStartPage + pageBoxSize - 1;
+		
+		if ( pageBoxEndPage > totalPage ) {
+			pageBoxEndPage = totalPage;
+		}
+		
+		// 이전버튼 페이지 계산
+		int pageBoxStartBeforePage = pageBoxStartPage - 1;
+		if ( pageBoxStartBeforePage < 1 ) {
+			pageBoxStartBeforePage = 1;
+		}
+		
+		// 다음버튼 페이지 계산
+		int pageBoxEndAfterPage = pageBoxEndPage + 1;
+		
+		if ( pageBoxEndAfterPage > totalPage ) {
+			pageBoxEndAfterPage = totalPage;
+		}
+		
+		// 이전버튼 노출여부 계산
+		boolean pageBoxStartBeforeBtnNeedToShow = pageBoxStartBeforePage != pageBoxStartPage;
+		// 다음버튼 노출여부 계산
+		boolean pageBoxEndAfterBtnNeedToShow = pageBoxEndAfterPage != pageBoxEndPage;
+				
+		if (pageBoxStartBeforeBtnNeedToShow) {
+			pageMenuContent.append("<li><a href=\"" + getArticleListFileName(board, pageBoxStartBeforePage)
+					+ "\" class=\"flex flex-ai-c\">&lt; 이전</a></li>");
+		}
+
+		for (int i = pageBoxStartPage; i <= pageBoxEndPage; i++) {
+			String selectedClass = "";
+
+			if (i == page) {
+				selectedClass = "article-page-menu__link--selected";
+			}
+
+			pageMenuContent.append("<li><a href=\"" + getArticleListFileName(board, i) + "\" class=\"flex flex-ai-c "
+					+ selectedClass + "\">" + i + "</a></li>");
+		}
+
+		if (pageBoxEndAfterBtnNeedToShow) {
+			pageMenuContent.append("<li><a href=\"" + getArticleListFileName(board, pageBoxEndAfterPage)
+					+ "\" class=\"flex flex-ai-c\">다음 &gt;</a></li>");
+		}
+
 		
 		String body = bodyTemplate.replace("${article_list__main-content}", mainContent.toString());
-		body = body.replace("${article_page__menu-content} ", pageMenuContent.toString());
-		
+		body = body.replace("${article-page-menu__content}", pageMenuContent.toString());
 		
 		sb.append(body);
 		
@@ -82,12 +138,21 @@ public class BuildService {
 		sb.append(Util.getFileContents("site_template/foot.html"));
 		
 		// 파일 생성
-		String fileName = "article_list_" + board.code + "_" + page +"_1.html";
+		String fileName = getArticleListFileName(board, page);
 		String filePath = "site/" + fileName;
 
 		Util.writeFile(filePath, sb.toString());
 		System.out.println(filePath + " 생성");
 	}
+
+	private String getArticleListFileName(Board board, int page) {
+		return getArticleListFileName(board.code, page);
+	}
+	
+	private String getArticleListFileName(String boardCode, int page) {
+		return "article_list_" + boardCode + "_" + page + ".html";
+	}
+
 
 	private void buildArticleListPages() {
 		List<Board> boards = articleService.getForPrintBoards();
@@ -143,43 +208,73 @@ public class BuildService {
 	}
 
 	private void buildArticleDetailPages() {
-		List<Article> articles = articleService.getArticles();
+		List<Board> boards = articleService.getForPrintBoards();
 		
-		String head = getHeadHtml("article_detail");		
+		String head = getHeadHtml("article_detail");
+		String bodyTemplate = Util.getFileContents("site_template/article_detail.html");
 		String foot = Util.getFileContents("site_template/foot.html");
 		
+		for (Board board : boards) {
+			List<Article> articles = articleService.getForPrintArticles(board.id);
 		
-		// 게시물 상세페이지 생성 
-		
-		for (Article article : articles) {
-			StringBuilder sb = new StringBuilder();
+			// 게시물 상세페이지 생성 
 			
-			sb.append(head);
-			
-			sb.append("번호 : " + article.id + "<br>");
-			sb.append("작성날짜 : " + article.regDate + "<br>");
-			sb.append("갱신날짜 : " + article.updateDate + "<br>");
-			sb.append("제목 : " + article.title + "<br>");
-			sb.append("내용 : " + article.body + "<br>");
-			if (article.id > 1) {
-				sb.append("<div><a href=\"" + "article_detail_" + (article.id - 1) + ".html\">이전 글</a></div>");
-			}
-			sb.append("<div><a href=\"" + "article_detail_" + (article.id + 1) + ".html\">다음 글</a></div>");
-			
-			sb.append("</div>");
-			
-			sb.append(foot);
-			
-			String fileName = "article_detail_" + article.id + ".html";
-			
-			String filePath = "site/" + fileName;
-			
-			Util.writeFile(filePath, sb.toString());
-			
-			System.out.println(filePath + " 생성");
-			
-		}	
-		
+			for (int i=0; i< articles.size(); i++) {
+				Article article = articles.get(i);
+				Article prevArticle = null;
+				int prevArticleIndex = i + 1;
+				int prevArticleId = 0;
+				
+				if (prevArticleIndex < articles.size()) {
+					prevArticle = articles.get(prevArticleIndex);
+					prevArticleId = prevArticle.id;
+				}
+				
+				Article nextArticle = null;
+				int nextArticleIndex = i - 1;
+				int nextArticleId = 0;
+				
+				if (nextArticleIndex >= 0) {
+					nextArticle = articles.get(nextArticleIndex);
+					nextArticleId = nextArticle.id;
+				}
+				
+				StringBuilder sb = new StringBuilder();
+				
+				sb.append(head);
+				
+				String body = bodyTemplate.replace("${article-detail__title}", article.title);
+				body = body.replace("${article-detail__board-name}", article.extra__boardName);
+				body = body.replace("${article-detail__reg-date}", article.regDate);
+				body = body.replace("${article-detail__writer}", article.extra__writer);
+				body = body.replace("${article-detail__body}", article.body);
+				body = body.replace("${article-detail__link-prev-article-url}", getArticleDetailFileName(prevArticleId));
+				body = body.replace("${article-detail__link-prev-article-title-attr}", prevArticle != null ? prevArticle.title : "");
+				body = body.replace("${article-detail__link-prev-article-class-addi}", prevArticleId == 0 ? "none" : "");
+				body = body.replace("${article-detail__link-list-url}", getArticleListFileName(article.extra__boardCode, 1));
+				body = body.replace("${article-detail__link-list-class-addi}", "");
+				body = body.replace("${article-detail__link-next-article-url}", getArticleDetailFileName(nextArticleId));
+				body = body.replace("${article-detail__link-next-article-title-attr}", nextArticle != null ? nextArticle.title : "");
+				body = body.replace("${article-detail__link-next-article-class-addi}", nextArticleId == 0 ? "none" : "");
+				
+				sb.append(body);
+				
+				sb.append(foot);
+				
+				String fileName = getArticleDetailFileName(article.id);
+				
+				String filePath = "site/" + fileName;
+				
+				Util.writeFile(filePath, sb.toString());
+				
+				System.out.println(filePath + " 생성");
+				
+			}	
+		}		
+	}
+
+	private String getArticleDetailFileName(int id) {
+		return "article_detail_" + id + ".html";
 	}
 
 	private String getHeadHtml(String pageName) {
@@ -192,7 +287,7 @@ public class BuildService {
 			for (Board board : forPrintBoards) {
 				boardMenuContentHtml.append("<li>");
 				
-				String link = board.code + "-list-1.html";
+				String link = getArticleListFileName(board, 1);
 				
 				boardMenuContentHtml.append("<a href=\"" + link + "\" class=\"block\">");
 				

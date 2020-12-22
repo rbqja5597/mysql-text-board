@@ -101,6 +101,29 @@ SET regDate = NOW(),
 updateDate = NOW(),
 title = CONCAT("제목_", RAND()),
 `body` = CONCAT("내용_", RAND()),
-memberId = IF(RAND() > 0.5, 1, 2),
-boardId = IF(RAND() > 0.5, 1, 2);
+memberId = FLOOR(RAND() * 2) + 1,
+boardId = FLOOR(RAND() * 1) + 1;
+
+INSERT INTO article
+SET regDate = NOW(),
+updateDate = NOW(),
+title = CONCAT("제목_", RAND()),
+`body` = CONCAT("내용_", RAND()),
+memberId = FLOOR(RAND() * 2) + 1,
+boardId = FLOOR(RAND() * 1) + 1;
+
+INSERT INTO article
+SET regDate = NOW(),
+updateDate = NOW(),
+title = CONCAT("제목_", RAND()),
+`body` = CONCAT("내용_", RAND()),
+memberId = FLOOR(RAND() * 2) + 1,
+boardId = FLOOR(RAND() * 1) + 1;
+
+SELECT * FROM article;
+
+# 2번글 내용에 자바 소스코드 넣기
+UPDATE article SET `body` = '# 자바기본문법\r\n```java\r\nint a = 10;\r\nint b = 20;\r\nint c = 30;\r\n```' 
+WHERE id = '2'; 
+
 
