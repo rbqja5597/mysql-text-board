@@ -311,12 +311,12 @@ public class BuildService {
 		if (pageName.equals("index")) {
 			return "<i class=\"fas fa-home\"></i> <span>HOME</span>";
 		} else if (pageName.equals("article_detail")) {
-			return "<i class=\"fas fa-file-alt\"></i> <span>ARTICLE DETAIL</span>";
-		} else if (pageName.startsWith("article_list_free")) {
-			return "<i class=\"fab fa-free-code-camp\"></i> <span>FREE LIST</span>";
+			return "<i class=\"fas fa-file-alt\"></i> <span>게시물 상세</span>";
 		} else if (pageName.startsWith("article_list_notice")) {
-			return "<i class=\"fas fa-flag\"></i> <span>NOTICE LIST</span>";
-		} else if (pageName.startsWith("article_list_")) {
+			return "<i class=\"fas fa-flag\"></i> <span>공지사항 게시판</span>";
+		} else if (pageName.startsWith("article_list_free")) {
+			return "<i class=\"fab fa-free-code-camp\"></i> <span>자유 게시판</span>";
+		}  else if (pageName.startsWith("article_list_")) {
 			return "<i class=\"fas fa-clipboard-list\"></i> <span>NOTICE LIST</span>";
 		}
 

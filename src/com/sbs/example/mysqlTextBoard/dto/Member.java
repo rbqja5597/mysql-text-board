@@ -32,7 +32,7 @@ public class Member {
 
 
 	public boolean isAdmin() {
-		return loginId.equals("test1");
+		return loginId.equals("admin");
 	}
 
 	
