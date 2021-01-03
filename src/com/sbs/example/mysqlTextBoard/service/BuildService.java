@@ -264,6 +264,9 @@ public class BuildService {
 				body = body.replace("${article-detail__link-next-article-title-attr}", nextArticle != null ? nextArticle.title : "");
 				body = body.replace("${article-detail__link-next-article-class-addi}", nextArticleId == 0 ? "none" : "");
 				
+				body = body.replace("${site-domain}", "ssg.gyubeom.com");
+				body = body.replace("${file-name}", getArticleDetailFileName(article.id));
+				
 				sb.append(body);
 				
 				sb.append(foot);
@@ -384,7 +387,8 @@ public class BuildService {
 		} else if (pageName.startsWith("article_list_free")) {
 			return "<i class=\"fab fa-free-code-camp\"></i> <span>자유 게시판</span>";
 		}  else if (pageName.startsWith("article_list_")) {
-			return "<i class=\"fas fa-clipboard-list\"></i> <span>NOTICE LIST</span>";
+			String boardName = pageName.replace("article_list_", "").toUpperCase(); 
+			return "<i class=\"fas fa-clipboard-list\"></i> <span> "+ boardName +" 게시판 </span>";
 		}
 
 		return "";

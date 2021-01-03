@@ -14,7 +14,7 @@ CREATE TABLE article (
     boardId INT(10) UNSIGNED NOT NULL
 );
 
-# 게시물 데이터 3개 생성
+# 게시물 데이터 4개 생성
 INSERT INTO article
 SET regDate = NOW(),
 updateDate = NOW(),
@@ -28,6 +28,14 @@ SET regDate = NOW(),
 updateDate = NOW(),
 title = '제목2',
 `body` = '내용2',
+memberId = 1,
+boardId = 1;
+
+INSERT INTO article
+SET regDate = NOW(),
+updateDate = NOW(),
+title = '제목3',
+`body` = '내용3',
 memberId = 1,
 boardId = 1;
 
@@ -94,6 +102,13 @@ updateDate = NOW(),
 `name` = '자유',
 `code` = 'free';
 
+# IT 게시판 추가
+INSERT INTO board 
+SET regDate = NOW(),
+updateDate = NOW(),
+`name` = 'JAVA',
+`code` = 'it';
+
 
 UPDATE article
 SET boardId = 2
@@ -129,6 +144,9 @@ boardId = FLOOR(RAND() * 1) + 1;
 */
 
 SELECT * FROM article;
+SELECT * FROM board;
+
+
 
 # 1번글 내용에 내용 넣기
 UPDATE article SET title = '공지사항', `body` = '# 공지사항\r\n- 개발자 블로그\r\n```\r\n환영합니다\r\n```', memberId = 3, boardId = 1
@@ -142,4 +160,8 @@ WHERE `id` = '2';
 UPDATE article SET title = '자유2', `body` = '# 자유게시판\r\n- 개발자 블로그\r\n```\r\n환영합니다.\r\n```', memberId = 3, boardId = 2
 WHERE `id` = '3'; 
 
+# 4번글 내용에 내용 넣기
+UPDATE article SET title = '1강. JAVA란?', `body` = '# 자바란 ?\r\n\r\n- 자바 소개\r\n```\r\n미국의 썬마이크로시스템즈(썬)에서 개발한 언어이다.\r\n2010년 오라클에서 썬을 인수하여 JAVA의 개발, 관리, 배포를 주관하고 있다.\r\n```\r\n\r\n- 자바 특징\r\n```\r\n1. 운영체제에 독립적\r\n2. 객제지향언어\r\n3. 배우기 쉬움\r\n4. 멀티쓰레드 지원\r\n5. 자동메모리 관리\r\n6. 네트워크와 분산처리 지원\r\n```\r\n'
+,memberId = 3, boardId = 3
+WHERE `id` = '4';
 

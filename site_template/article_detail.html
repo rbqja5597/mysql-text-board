@@ -46,6 +46,10 @@
           <div class="article-detail__reply-box">
           <div id="disqus_thread"></div>
 			<script>
+			 var disqus_config = function() {
+				 this.page.url = 'https://${site-domain}/${file-name}';
+				 this.page.idenfifer = '${file-name}';
+			 };
 			 (function() { // DON'T EDIT BELOW THIS LINE
    			 var d = document, s = d.createElement('script');
    			 s.src = 'https://enkung.disqus.com/embed.js';
@@ -85,5 +89,8 @@ function ArticleDetail__Body__init() {
 }
 
 ArticleDetail__Body__init();
+
+
+
 
 </script>

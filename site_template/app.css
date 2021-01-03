@@ -308,3 +308,28 @@ a {
 }
 
 /* 게시물 상세 끝 */
+
+/* TOP 버튼 */
+.go-top {
+	position: fixed;
+	right: 20px;
+	bottom: 20px;
+	z-index: 100;
+	background-color: white;
+	opacity: .8;
+	width: 50px;
+	height: 40px;
+	border-radius:25%;
+	border: none;
+	color:black;
+	text-align:center;
+	font-size:35px;
+}
+.go-top:hover {
+	cursor: pointer;
+}
+
+.icons {
+	
+}
+/* TOP 버튼 끝 */
