@@ -142,6 +142,24 @@ public class Util {
 		
 		return true;
 	}
+
+	public static void copyDir(String sourceDirectoryLocation, String destinationDirectoryLocation) {
+		rmdir(destinationDirectoryLocation);
+
+		try {
+			Files.walk(Paths.get(sourceDirectoryLocation)).forEach(source -> {
+				Path destination = Paths.get(destinationDirectoryLocation,
+						source.toString().substring(sourceDirectoryLocation.length()));
+				try {
+					Files.copy(source, destination);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 }
 

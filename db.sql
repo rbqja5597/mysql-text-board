@@ -64,6 +64,13 @@ loginId = 'test2',
 loginPw = 'test2',
 `name` = '테스터2';
 
+INSERT INTO `member`
+SET regDate = NOW(),
+updateDate = NOW(),
+loginId = 'admin',
+loginPw = 'admin',
+`name` = '김규범';
+
 # 게시판 테이블 생성
 CREATE TABLE board (
     id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -96,7 +103,7 @@ LIMIT 2;
 
 SELECT * FROM article;
 
-INSERT INTO article
+/*INSERT INTO article
 SET regDate = NOW(),
 updateDate = NOW(),
 title = CONCAT("제목_", RAND()),
@@ -119,11 +126,20 @@ title = CONCAT("제목_", RAND()),
 `body` = CONCAT("내용_", RAND()),
 memberId = FLOOR(RAND() * 2) + 1,
 boardId = FLOOR(RAND() * 1) + 1;
+*/
 
 SELECT * FROM article;
 
-# 2번글 내용에 자바 소스코드 넣기
-UPDATE article SET `body` = '# 자바기본문법\r\n```java\r\nint a = 10;\r\nint b = 20;\r\nint c = 30;\r\n```' 
-WHERE id = '2'; 
+# 1번글 내용에 내용 넣기
+UPDATE article SET title = '공지사항', `body` = '# 공지사항\r\n- 개발자 블로그\r\n```\r\n환영합니다\r\n```', memberId = 3, boardId = 1
+WHERE `id` = '1'; 
+
+# 2번글 내용에 내용 넣기
+UPDATE article SET title = '자유1', `body` = '# 자유게시판\r\n\r\n```\r\n자유게시판입니다.\r\n```', memberId = 3, boardId = 2
+WHERE `id` = '2';
+
+# 3번글 내용에 내용 넣기
+UPDATE article SET title = '자유2', `body` = '# 자유게시판\r\n- 개발자 블로그\r\n```\r\n환영합니다.\r\n```', memberId = 3, boardId = 2
+WHERE `id` = '3'; 
 
 
