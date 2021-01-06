@@ -2,18 +2,18 @@ console.clear();
 const articleList = [];
 
 $.get(
-	'https://api.github.com/repos/vuejs/vue/commits?per_page=20&sha=master',
+	'article_list.json',
 	{},
 	function(data) {
 		data.forEach((row, index) => {
 			console.log(row);
 
 			const article = {
-				id: index + 1,
-				regDate: row.commit.author.date,
-				writer: row.commit.author.name,
-				title: row.commit.message,
-				body: row.commit.message
+				id: row.id,
+				regDate: row.regDate,
+				writer: row.extra__writer,
+				title: row.title,
+				body: row.body
 			};
 
 			articleList.push(article);

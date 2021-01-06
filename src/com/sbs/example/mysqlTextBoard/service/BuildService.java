@@ -36,7 +36,11 @@ public class BuildService {
 	}
 
 	private void buildArticleSearchPage() {
-		Util.copy("site_template/article_search.html", "site/article_search.html");
+		List<Article> articles = articleService.getForPrintArticles(0);
+		String jsonText = Util.getJsonText(articles);
+		Util.writeFile("site/article_list.json", jsonText);
+		
+		Util.copy("site_template/article_search.js", "site/article_search.js");
 
 		StringBuilder sb = new StringBuilder();
 
