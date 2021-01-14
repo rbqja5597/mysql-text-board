@@ -13,7 +13,7 @@ public class BuildService {
 	MemberService memberService;
 
 	public BuildService() {
-		articleService = Container.articleService;
+		articleService = Container.articleService; 
 		memberService = Container.memberService;
 	}
 
