@@ -33,6 +33,13 @@ public class BuildService {
 		buildArticleListPages();
 		buildArticleSearchPage();
 		buildArticleDetailPages();
+		buildArticleTagPages();
+	}
+
+	private void buildArticleTagPages() {
+		
+		
+		
 	}
 
 	private void buildArticleSearchPage() {
